@@ -21,5 +21,4 @@ export const useInventoryStore = create<InventoryState>((set) => ({
 
 // TODO: 拠点フィルタリング用の selector を追加する
 // TODO: 在庫数の更新（楽観的更新）アクションを追加する
-// TODO: 追加購入フラグのトグルアクションを追加する
-// TODO: Supabase との同期（fetch / mutate）ロジックを追加する
+// TODO: Supabase との同期（fetch / mutate）ロジックを一覧画面へ集約する

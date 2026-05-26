@@ -12,6 +12,13 @@
   --font-mono: var(--font-geist-mono);
 }
 
+:root {
+  /* コンポーネントから var(--primary) 等で参照するブランドトークン */
+  --primary: #1a3a2a;
+  --surface: #fbfbf9;
+  --border: #ddddda;
+}
+
 body {
   background: var(--color-background);
   color: var(--color-foreground);
