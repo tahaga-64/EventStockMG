@@ -45,5 +45,55 @@ export async function fetchInventoryItems(): Promise<{
   }
 }
 
+// 追加購入フラグのみを更新する（RLS・ポリシー前提）
+export async function updateInventoryNeedsReorder(
+  id: string,
+  needs_reorder: boolean,
+): Promise<{ error: string | null }> {
+  try {
+    const { error } = await createClient()
+      .from("inventory_items")
+      .update({ needs_reorder })
+      .eq("id", id);
+
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "不明なエラーが発生しました";
+    return { error: message };
+  }
+}
+
+// needs_reorder が true のアイテムだけを取得する
+export async function fetchReorderInventoryItems(): Promise<{
+  items: InventoryItem[];
+  error: string | null;
+}> {
+  try {
+    const { data, error } = await createClient()
+      .from("inventory_items")
+      .select("*")
+      .eq("needs_reorder", true)
+      .order("location")
+      .order("name");
+
+    if (error) {
+      return { items: [], error: error.message };
+    }
+
+    return {
+      items: (data ?? []).map(toInventoryItem),
+      error: null,
+    };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "不明なエラーが発生しました";
+    return { items: [], error: message };
+  }
+}
+
 // TODO: 拠点でフィルタリングした取得関数を追加する
-// TODO: 在庫数更新・追加購入フラグ更新の mutation 関数を追加する
+// TODO: 在庫数更新の mutation 関数を追加する

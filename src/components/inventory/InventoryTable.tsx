@@ -1,11 +1,59 @@
+"use client";
+
+import { useEffect, useState, startTransition } from "react";
+import { ReorderCheckbox } from "@/components/inventory/ReorderCheckbox";
 import { StatusBadge } from "@/components/inventory/StatusBadge";
+import { useToast } from "@/components/ui/ToastProvider";
+import { updateInventoryNeedsReorder } from "@/lib/inventory";
 import type { InventoryItem } from "@/types/inventory";
 
 interface InventoryTableProps {
   items: InventoryItem[];
 }
 
-export function InventoryTable({ items }: InventoryTableProps) {
+export function InventoryTable({ items: initialItems }: InventoryTableProps) {
+  const { showToast } = useToast();
+  const [items, setItems] = useState<InventoryItem[]>(initialItems);
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+
+  // サーバーから渡された一覧が変わったら同期する（再検証・他端末更新用）
+  useEffect(() => {
+    startTransition(() => {
+      setItems(initialItems);
+    });
+  }, [initialItems]);
+
+  const handleReorderToggle = async (id: string, next: boolean) => {
+    let snapshot: InventoryItem[] | null = null;
+    setItems((prev) => {
+      snapshot = prev;
+      return prev.map((row) =>
+        row.id === id ? { ...row, needs_reorder: next } : row,
+      );
+    });
+
+    setPendingIds((prev) => {
+      const copy = new Set(prev);
+      copy.add(id);
+      return copy;
+    });
+
+    const { error } = await updateInventoryNeedsReorder(id, next);
+
+    setPendingIds((prev) => {
+      const copy = new Set(prev);
+      copy.delete(id);
+      return copy;
+    });
+
+    if (error) {
+      if (snapshot) {
+        setItems(snapshot);
+      }
+      showToast(`更新に失敗しました: ${error}`, "error");
+    }
+  };
+
   if (items.length === 0) {
     return (
       <p className="py-24 text-[13px] font-light leading-[1.9] text-muted">
@@ -64,15 +112,25 @@ export function InventoryTable({ items }: InventoryTableProps) {
                 />
               </td>
               <td className="py-5">
-                <span
-                  className={`text-[12px] leading-[1.7] tracking-[0.02em] ${
-                    item.needs_reorder
-                      ? "font-bold text-accent"
-                      : "font-light text-muted"
-                  }`}
-                >
-                  {item.needs_reorder ? "必要" : "—"}
-                </span>
+                <div className="flex items-center gap-3">
+                  <ReorderCheckbox
+                    id={item.id}
+                    checked={item.needs_reorder}
+                    disabled={pendingIds.has(item.id)}
+                    onCheckedChange={(next) => {
+                      void handleReorderToggle(item.id, next);
+                    }}
+                  />
+                  <span
+                    className={`text-[12px] leading-[1.7] tracking-[0.02em] ${
+                      item.needs_reorder
+                        ? "font-bold text-accent"
+                        : "font-light text-muted"
+                    }`}
+                  >
+                    {item.needs_reorder ? "必要" : "—"}
+                  </span>
+                </div>
               </td>
             </tr>
           ))}
