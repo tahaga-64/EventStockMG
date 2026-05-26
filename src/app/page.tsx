@@ -1,65 +1,74 @@
-import Image from "next/image";
+import { Package2 } from "lucide-react";
+import { InventoryTable } from "@/components/inventory/InventoryTable";
+import { fetchInventoryItems } from "@/lib/inventory";
 
-export default function Home() {
+// Supabase から実行時にデータ取得するため動的レンダリングにする
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const { items, error } = await fetchInventoryItems();
+
+  if (error) {
+    return (
+      <div className="min-h-full bg-background pl-[7vw] pr-[18vw] pt-28">
+        <p className="text-sm font-light leading-[1.9] text-muted">
+          データ取得エラー
+        </p>
+      </div>
+    );
+  }
+
+  const reorderCount = items.filter((item) => item.needs_reorder).length;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-full bg-background">
+      <header className="pl-[7vw] pr-[22vw] pt-20 pb-16">
+        <div className="mb-10 flex items-center gap-2.5">
+          <Package2
+            size={15}
+            strokeWidth={1.5}
+            className="text-accent"
+            aria-hidden
+          />
+          <p className="text-[10px] font-light tracking-[0.22em] text-muted uppercase">
+            Inventory
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        <h1 className="max-w-[14ch] text-[clamp(2.75rem,6vw,4.25rem)] font-bold leading-[1.05] tracking-[-0.03em]">
+          在庫管理
+        </h1>
+        <p className="mt-8 max-w-sm text-[13px] font-light leading-[1.95] text-muted">
+          拠点ごとの在庫数と補充状況。
+          <br />
+          更新日時は各行末尾に表示予定。
+        </p>
+        <dl className="mt-14 flex gap-16">
+          <div>
+            <dt className="text-[10px] font-light tracking-[0.18em] text-muted uppercase">
+              Items
+            </dt>
+            <dd className="mt-2 font-mono text-[2rem] font-light leading-none tracking-tight">
+              {items.length}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[10px] font-light tracking-[0.18em] text-muted uppercase">
+              Reorder
+            </dt>
+            <dd className="mt-2 font-mono text-[2rem] font-bold leading-none tracking-tight text-accent">
+              {reorderCount}
+            </dd>
+          </div>
+        </dl>
+      </header>
+
+      <section className="border-t border-border-light pl-[7vw] pr-[10vw] pb-28 pt-2">
+        <InventoryTable items={items} />
+      </section>
     </div>
   );
 }
+
+// TODO: 拠点フィルタ（Zustand store 連携）を追加する
+// TODO: 在庫アイテムの新規登録フォームを追加する
+// TODO: ローディング状態の表示を追加する
