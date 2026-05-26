@@ -1,6 +1,6 @@
 import { Package2 } from "lucide-react";
 import { InventoryTable } from "@/components/inventory/InventoryTable";
-import { fetchInventoryItems } from "@/lib/inventory";
+import { fetchInventoryItems } from "@/lib/inventory-queries";
 
 // Supabase から実行時にデータ取得するため動的レンダリングにする
 export const dynamic = "force-dynamic";
@@ -14,6 +14,11 @@ export default async function Home() {
         <p className="text-sm font-light leading-[1.9] text-muted">
           データ取得エラー
         </p>
+        {process.env.NODE_ENV === "development" ? (
+          <pre className="mt-6 max-w-3xl whitespace-pre-wrap break-words font-mono text-[11px] leading-relaxed text-red-700">
+            {error}
+          </pre>
+        ) : null}
       </div>
     );
   }

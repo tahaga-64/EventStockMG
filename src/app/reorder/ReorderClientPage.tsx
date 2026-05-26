@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { PackageCheck } from "lucide-react";
 import { useEffect, useState, startTransition } from "react";
-import { updateInventoryNeedsReorder } from "@/lib/inventory";
+import { updateInventoryNeedsReorder } from "@/lib/inventory-actions";
 import { buildReorderClipboardText } from "@/lib/reorderClipboard";
 import type { InventoryItem } from "@/types/inventory";
 import { useToast } from "@/components/ui/ToastProvider";

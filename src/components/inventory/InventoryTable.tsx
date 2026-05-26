@@ -4,7 +4,7 @@ import { useEffect, useState, startTransition } from "react";
 import { ReorderCheckbox } from "@/components/inventory/ReorderCheckbox";
 import { StatusBadge } from "@/components/inventory/StatusBadge";
 import { useToast } from "@/components/ui/ToastProvider";
-import { updateInventoryNeedsReorder } from "@/lib/inventory";
+import { updateInventoryNeedsReorder } from "@/lib/inventory-actions";
 import type { InventoryItem } from "@/types/inventory";
 
 interface InventoryTableProps {

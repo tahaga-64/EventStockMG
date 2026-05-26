@@ -1,5 +1,5 @@
 import { ReorderClientPage } from "@/app/reorder/ReorderClientPage";
-import { fetchReorderInventoryItems } from "@/lib/inventory";
+import { fetchReorderInventoryItems } from "@/lib/inventory-queries";
 
 // Supabase から実行時にデータ取得するため動的レンダリングにする
 export const dynamic = "force-dynamic";
